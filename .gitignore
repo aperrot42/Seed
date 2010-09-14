@@ -3,6 +3,7 @@
 #QT creator specifics
 CMakeLists.txt.user
 qtcreator-build/
+raw/
 
 
 #OSX specifics
