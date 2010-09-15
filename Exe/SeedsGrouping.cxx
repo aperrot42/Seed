@@ -34,7 +34,7 @@ class compareFirst
 public:
   inline bool operator() (const std::pair<T1,T2>& l, const std::pair<T1,T2>& r)
    {
-     return l.first < r.first;
+     return l.first > r.first;
    }
 };
 
@@ -121,6 +121,7 @@ int main(int argc, char* argv [] )
       {
       // generate measurement vector from index
       pixelIndex = inputIterator.GetIndex();
+      // TransformToPhysicalPoint
       pointPosition[0] = pixelIndex[0]*inputSpacing[0]-inputOrigin[0];
       pointPosition[1] = pixelIndex[1]*inputSpacing[1]-inputOrigin[1];
       pointPosition[2] = pixelIndex[2]*inputSpacing[2]-inputOrigin[2];
@@ -142,7 +143,6 @@ int main(int argc, char* argv [] )
   pointsQueue.sort( compareFirst
                     < InputImageType::PixelType,
                       InputImageType::PointType >() );
- pointsQueue.reverse();
 
   std::cout << "Generating KdTree" << std::endl;
   TreeGeneratorType::Pointer treeGenerator = TreeGeneratorType::New();
@@ -161,7 +161,8 @@ int main(int argc, char* argv [] )
     }
 
   TreeType::InstanceIdentifierVectorType neighbors;
-
+  typedef TreeType::InstanceIdentifierVectorType::iterator 
+    IdentifierVectorIterator;
 
   pointListQueueType::iterator pointListIterator;
   pointListQueueType::iterator pointListIterator2;
@@ -174,10 +175,10 @@ int main(int argc, char* argv [] )
 
   std::cout << "Filtering seeds" << std::endl;
 
-  unsigned int pointsToVisit = pointsQueue.size();
-  pointListIterator = pointsQueue.begin();
-  while ( (pointListIterator != pointsQueue.end()) && pointsToVisit != 0 )
+  while ( !pointsQueue.empty() )
     {
+    pointListIterator = pointsQueue.begin();
+
     // create the query point
     pointPosition = pointListIterator->second;
     for ( unsigned int i = 0 ; i < Dimension ; ++i )
@@ -188,9 +189,9 @@ int main(int argc, char* argv [] )
     //start the query
     tree->Search( queryPoint, m_smallestRadius, neighbors );
 
-    std::cout << "point priority : " << pointListIterator->first
-              << " points remaining : " << pointsToVisit
-              << std::endl;
+//    std::cout << "point priority : " << pointListIterator->first
+//              << " points remaining : " << pointsToVisit
+//              << std::endl;
     /*
     std::cout << "kd-tree knn search result:" << std::endl
               << "query point = " << queryPoint << std::endl
@@ -200,29 +201,31 @@ int main(int argc, char* argv [] )
     std::cout << "  measurement vector : distance" << std::endl;
     */
     // for all query results
-    for ( unsigned int i = 0 ; i < neighbors.size() ; ++i )
+    IdentifierVectorIterator n_it = neighbors.begin();
+    for( ; n_it != neighbors.end(); ++n_it )
       {
-      /*
       // for all query results, display distances
-      pointToDeleteMeasurementVector = tree->GetMeasurementVector(
-          neighbors[i] );
-      std::cout << "  "
-                << tree->GetMeasurementVector( neighbors[i] )
-                << " : "
-                << distanceMetric->Evaluate( pointToDeleteMeasurementVector ) << std::endl;
-      */
+      pointToDeleteMeasurementVector = 
+        tree->GetMeasurementVector( *n_it );
+      //
+      //std::cout << "  "
+      //          << tree->GetMeasurementVector( neighbors[i] )
+      //          << " : "
+      //          << distanceMetric->Evaluate( pointToDeleteMeasurementVector ) << std::endl;
       //delete seeds corresponding to description
-      for ( pointListIterator2 = pointsQueue.begin() ;
-            pointListIterator2 != pointsQueue.end(); ++pointListIterator2 )
+      pointListIterator2 = pointListIterator;
+      ++pointListIterator2;
+
+      for ( ; pointListIterator2 != pointsQueue.end(); ++pointListIterator2 )
         {
-        if (  (pointListIterator2 != pointListIterator)
-           && (pointListIterator2->second[0]==(pointToDeleteMeasurementVector[0]) )
+        if( 
+           (pointListIterator2->second[0]==(pointToDeleteMeasurementVector[0]) )
            && (pointListIterator2->second[1]==(pointToDeleteMeasurementVector[1]) )
            && (pointListIterator2->second[2]==(pointToDeleteMeasurementVector[2]) ) )
           {
           //std::cout << "    erase : " << pointListIterator2->second << std::endl;
           pointsQueue.erase(pointListIterator2);
-          --pointsToVisit;
+          break;
           }
         }
 
@@ -230,10 +233,9 @@ int main(int argc, char* argv [] )
 
     // store current query point in the final points vector
     finalPoints.push_front( pointPairType(pointListIterator->first,pointListIterator->second) );
-    --pointsToVisit;
     // delete current query point from the point query list
-    pointListIterator = pointsQueue.erase(pointListIterator);
-    std::cout << std::endl;
+    pointsQueue.pop_front();
+    std::cout << pointsQueue.size() << std::endl;
     }
 
 
@@ -270,7 +272,7 @@ int main(int argc, char* argv [] )
     }
 
   WriterType::Pointer writer = WriterType::New();
-  writer->SetFileName( argv[3] );
+  writer->SetFileName( argv[2] );
   writer->SetInput ( outputImage );
 
   std::cout << "writing output image" << std::endl;

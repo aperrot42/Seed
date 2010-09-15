@@ -28,7 +28,7 @@ int main(int argc, char* argv [] )
     {
     std::cerr << "Missing Parameters: "
               << argv[0] << std::endl
-              << "ThresholdedSeedImage(itkimage) "
+              << "InputImage(itkimage) "
               << "OutputImage(itkimage) "
               << "smallestNucleiRadius(double)" << std::endl;
     return EXIT_FAILURE;
@@ -55,7 +55,7 @@ int main(int argc, char* argv [] )
   typedef itk::GrayscaleDilateImageFilter< InputImageType,  InputImageType, StructuringElementType >
     DilateFilterType;
 
-  std::cout << "reading thresholded nuclei image" << std::endl;
+  std::cout << "reading input image" << std::endl;
   ReaderType::Pointer reader = ReaderType::New();
   reader->SetFileName ( argv[1] );
   reader->Update();
@@ -80,7 +80,10 @@ int main(int argc, char* argv [] )
   DilateFilterType::Pointer grayscaleDilateFilter = DilateFilterType::New();
   grayscaleDilateFilter->SetKernel( structuringElement );
 
-  std::cout << "dilate distance map with a sphere of radius : " << std::endl;
+  std::cout << "dilate input image with a sphere of radius : " 
+            << structuringRadius
+            << std::endl;
+
   grayscaleDilateFilter->SetInput(reader->GetOutput());
   grayscaleDilateFilter->Update();
 

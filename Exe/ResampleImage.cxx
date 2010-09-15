@@ -80,8 +80,8 @@ int main( int argc, char * argv[] )
 
   const double isoSpacing = vcl_sqrt( inputSpacing[2] * inputSpacing[0] );
 
-  smootherX->SetSigma( isoSpacing*vcl_sqrt( 2 ) );
-  smootherY->SetSigma( isoSpacing*vcl_sqrt( 2 ) );
+  smootherX->SetSigma( isoSpacing*0.3 );
+  smootherY->SetSigma( isoSpacing*0.3 );
 
   smootherX->SetDirection( 0 );
   smootherY->SetDirection( 1 );
@@ -89,7 +89,7 @@ int main( int argc, char * argv[] )
   smootherX->SetNormalizeAcrossScale( true );
   smootherY->SetNormalizeAcrossScale( true );
 
-  typedef   unsigned char   OutputPixelType;
+  typedef   float   OutputPixelType;
 
   typedef itk::Image< OutputPixelType,   Dimension >   OutputImageType;
 
@@ -162,10 +162,10 @@ int main( int argc, char * argv[] )
   resampler->SetSize( size );
   resampler->SetInput( smootherY->GetOutput() );
 
-  smootherX->SetNumberOfThreads(2);
-  smootherY->SetNumberOfThreads(2);
+  smootherX->SetNumberOfThreads(6);
+  smootherY->SetNumberOfThreads(6);
   //splineInterpolator->SetNumberOfThreads(2);
-  resampler->SetNumberOfThreads(2);
+  resampler->SetNumberOfThreads(6);
 
   resampler->Update();
 

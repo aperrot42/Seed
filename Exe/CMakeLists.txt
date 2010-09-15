@@ -1,6 +1,6 @@
 SET( CONFOREG_EXE_ITK_SRC
 #  seed
-#  MedianFiltering
+  MedianFiltering
   ResampleImage
   BinaryThresholdFiltering
   DistanceMapCalculation
