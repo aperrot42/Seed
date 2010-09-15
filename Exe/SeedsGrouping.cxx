@@ -238,6 +238,51 @@ int main(int argc, char* argv [] )
 
 
 
+  pointListQueueType::iterator finalPointsIterator;
+
+
+  OutputImageType::IndexType outputPixelIndex;
+  OutputImageType::PointType outputPointPosition;
+  OutputImageType::SpacingType outputSpacing = reader->GetOutput()->GetSpacing();
+  OutputImageType::PointType outputOrigin = reader->GetOutput()->GetOrigin();
+
+  OutputImageType::Pointer outputImage = OutputImageType::New();
+  outputImage->SetRegions( reader->GetOutput()->GetLargestPossibleRegion() );
+  outputImage->Allocate();
+  outputImage->FillBuffer(itk::NumericTraits< OutputPixelType >::Zero);
+
+
+
+  std::cout << "writing the final " << finalPoints.size()
+            <<" points to an image" << std::endl;
+
+  for ( finalPointsIterator = finalPoints.begin();
+        finalPointsIterator != finalPoints.end();
+        ++finalPointsIterator )
+    {
+    outputPointPosition = finalPointsIterator->second;
+
+    for (unsigned int i = 0; i<Dimension;++i)
+      {
+      outputPixelIndex[i] = (unsigned int) outputPointPosition[i]/inputSpacing[i];
+      }
+    outputImage->SetPixel(outputPixelIndex,finalPointsIterator->first);
+    }
+
+  WriterType::Pointer writer = WriterType::New();
+  writer->SetFileName( argv[3] );
+  writer->SetInput ( outputImage );
+
+  std::cout << "writing output image" << std::endl;
+  try
+    {
+    writer->Update();
+    }
+  catch( itk::ExceptionObject & err )
+    {
+    std::cerr << "Exception caught: " << err << std::endl;
+    return EXIT_FAILURE;
+    }
 
 
   return EXIT_SUCCESS;
