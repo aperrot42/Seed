@@ -32,7 +32,7 @@ template < class T1, class T2 >
 class compareFirst
 {
 public:
-  bool operator() (const std::pair<T1,T2>& l, const std::pair<T1,T2>& r)
+  inline bool operator() (const std::pair<T1,T2>& l, const std::pair<T1,T2>& r)
    {
      return l.first < r.first;
    }
@@ -90,8 +90,7 @@ int main(int argc, char* argv [] )
   typedef std::list< pointPairType > pointListQueueType;
 
 
-  float   m_smallestRadius;
-  m_smallestRadius = atof(argv[3]);
+  float   m_smallestRadius = atof(argv[3]);
 
   std::cout << "reading input image" << std::endl;
   ReaderType::Pointer reader = ReaderType::New();
@@ -192,15 +191,18 @@ int main(int argc, char* argv [] )
     std::cout << "point priority : " << pointListIterator->first
               << " points remaining : " << pointsToVisit
               << std::endl;
+    /*
     std::cout << "kd-tree knn search result:" << std::endl
               << "query point = " << queryPoint << std::endl
               << "distance max = " << m_smallestRadius << std::endl;
 
     distanceMetric->SetOrigin( origin );
     std::cout << "  measurement vector : distance" << std::endl;
+    */
     // for all query results
     for ( unsigned int i = 0 ; i < neighbors.size() ; ++i )
       {
+      /*
       // for all query results, display distances
       pointToDeleteMeasurementVector = tree->GetMeasurementVector(
           neighbors[i] );
@@ -208,6 +210,7 @@ int main(int argc, char* argv [] )
                 << tree->GetMeasurementVector( neighbors[i] )
                 << " : "
                 << distanceMetric->Evaluate( pointToDeleteMeasurementVector ) << std::endl;
+      */
       //delete seeds corresponding to description
       for ( pointListIterator2 = pointsQueue.begin() ;
             pointListIterator2 != pointsQueue.end(); ++pointListIterator2 )
@@ -217,7 +220,7 @@ int main(int argc, char* argv [] )
            && (pointListIterator2->second[1]==(pointToDeleteMeasurementVector[1]) )
            && (pointListIterator2->second[2]==(pointToDeleteMeasurementVector[2]) ) )
           {
-          std::cout << "    erase : " << pointListIterator2->second << std::endl;
+          //std::cout << "    erase : " << pointListIterator2->second << std::endl;
           pointsQueue.erase(pointListIterator2);
           --pointsToVisit;
           }

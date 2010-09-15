@@ -17,22 +17,21 @@
 #include "itkImageFileReader.h"
 #include "itkImageFileWriter.h"
 #include "itkRescaleIntensityImageFilter.h"
-#include "itkGrayscaleDilateImageFilter.h"
+#include "itkThresholdImageFilter.h"
 #include "itkNumericTraits.h"
-#include "itkBinaryBallStructuringElement.h"
-#include "itkImage.h"
 
 int main(int argc, char* argv [] )
 {
-  if ( argc < 4 )
+  if ( argc < 5 )
     {
     std::cerr << "Missing Parameters: "
               << argv[0] << std::endl
-              << "ThresholdedSeedImage(itkimage) "
-              << "OutputImage(itkimage) "
-              << "smallestNucleiRadius(double)" << std::endl;
+              << "inputImage(itkimage) outputImage(itkimage)" << std::endl
+              << "LowThreshold(double) HighThreshold(double) "
+              << "OutOfRange(double)" << std::endl;
     return EXIT_FAILURE;
     }
+
   // Define the dimension of the images
   const int Dimension = 3;
 
@@ -48,45 +47,34 @@ int main(int argc, char* argv [] )
   // Output writer
   typedef itk::ImageFileWriter< OutputImageType > WriterType;
 
-  // binary ball
-  typedef itk::BinaryBallStructuringElement< InputPixelType,
-  Dimension >	StructuringElementType;
-  // dilate filter
-  typedef itk::GrayscaleDilateImageFilter< InputImageType,  InputImageType, StructuringElementType >
-    DilateFilterType;
+  // binary threshold filter
+  typedef itk::ThresholdImageFilter< InputImageType >
+    thresholdFilterType;
 
-  std::cout << "reading thresholded nuclei image" << std::endl;
+  float m_lowThreshold = atof(argv[3]);
+  float m_highThreshold = atof(argv[4]);
+  float m_outOfRange = atof(argv[5]);
+
+  std::cout << "reading input image" << std::endl;
   ReaderType::Pointer reader = ReaderType::New();
   reader->SetFileName ( argv[1] );
   reader->Update();
 
-  float   m_smallestRadius = atof(argv[3]);
+  std::cout << "Threshold computing" << std::endl;
+  std::cout << "LowThreshold = " << m_lowThreshold << std::endl;
+  std::cout << "HighThreshold = " << m_highThreshold << std::endl;
+  std::cout << "OutOfRang value = " << m_outOfRange << std::endl;
 
-  StructuringElementType::RadiusType structuringRadius;
-  StructuringElementType structuringElement;
-
-  for (int i=0; i< Dimension;++i)
-    {
-    structuringRadius[i] = static_cast<unsigned int>(
-                             m_smallestRadius
-                             /(reader->GetOutput()->GetSpacing()[i]) );
-    }
-  std::cout << structuringRadius << std::endl;
-
-  structuringElement.SetRadius(structuringRadius); // 3x3 structuring element
-
-  structuringElement.CreateStructuringElement();
-
-  DilateFilterType::Pointer grayscaleDilateFilter = DilateFilterType::New();
-  grayscaleDilateFilter->SetKernel( structuringElement );
-
-  std::cout << "dilate distance map with a sphere of radius : " << std::endl;
-  grayscaleDilateFilter->SetInput(reader->GetOutput());
-  grayscaleDilateFilter->Update();
+  thresholdFilterType::Pointer thresholdFilter
+    = thresholdFilterType::New();
+  thresholdFilter->SetInput(reader->GetOutput());
+  thresholdFilter->ThresholdOutside( m_lowThreshold, m_highThreshold );
+  thresholdFilter->SetOutsideValue( m_outOfRange);
+  thresholdFilter->Update();
 
   WriterType::Pointer writer = WriterType::New();
   writer->SetFileName( argv[2] );
-  writer->SetInput ( grayscaleDilateFilter->GetOutput() );
+  writer->SetInput ( thresholdFilter->GetOutput() );
 
   std::cout << "writing output image" << std::endl;
   try
@@ -102,3 +90,4 @@ int main(int argc, char* argv [] )
 
   return EXIT_SUCCESS;
 }
+

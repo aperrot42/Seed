@@ -1,8 +1,11 @@
 SET( CONFOREG_EXE_ITK_SRC
 #  seed
-  ThresholdFiltering
+#  MedianFiltering
+  ResampleImage
+  BinaryThresholdFiltering
   DistanceMapCalculation
-#  DilateDistanceMap
+  KeepRangeFiltering
+  DilateDistanceMap
   LocalMaximaExtraction
   SeedsFilteringNuclei
   SeedsGrouping
