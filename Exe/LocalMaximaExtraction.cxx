@@ -35,11 +35,12 @@ int main(int argc, char* argv [] )
     std::cerr << "Missing Parameters: "
               << argv[0] << std::endl
               << "InputImage(itkimage) OutputImage(itkimage)" << std::endl
-              << "MaximumMaxima(double)" << std::endl;
+              << "MinimumMaxima(double) MaximumMaxima(double)" << std::endl;
     return EXIT_FAILURE;
     }
 
-  float m_MaxDistance = atof(argv[3]);
+  float m_MinDistance = atof(argv[3]);
+  float m_MaxDistance = atof(argv[4]);
 
   // Define the dimension of the images
   const int Dimension = 3;
@@ -82,7 +83,7 @@ int main(int argc, char* argv [] )
   ThresholdFilterType::Pointer thresholdFilter
       = ThresholdFilterType::New();
   thresholdFilter->SetInput(localMaximaFilter->GetOutput());
-  thresholdFilter->ThresholdOutside(itk::NumericTraits< OutputPixelType >::Zero,
+  thresholdFilter->ThresholdOutside(m_MinDistance,
                                     m_MaxDistance);
   thresholdFilter->Update();
 

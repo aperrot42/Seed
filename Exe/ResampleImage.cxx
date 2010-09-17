@@ -8,6 +8,7 @@
 #include "itkLinearInterpolateImageFunction.h"
 #include "itkIntensityWindowingImageFilter.h"
 #include "itkBSplineInterpolateImageFunction.h"
+#include  "itkNearestNeighborInterpolateImageFunction.h"
 
 int main( int argc, char * argv[] )
 {
@@ -16,7 +17,7 @@ int main( int argc, char * argv[] )
     std::cerr << "Usage: " << std::endl;
     std::cerr << argv[0]
               << " inputImageFile(itkimage)  outputImageFile(itkimage) "
-              << " lowerIntensity(uchar) upperIntensity(uchar) Linear-Bspline(0-5)" << std::endl;
+              << " lowerIntensity(uchar) upperIntensity(uchar) Nearest/Linear/Bspline(-1/0/5)" << std::endl;
     return EXIT_FAILURE;
     }
 
@@ -109,24 +110,34 @@ int main( int argc, char * argv[] )
 
   typedef itk::BSplineInterpolateImageFunction<
     InternalImageType, double >  SplineInterpolatorType;
-
   SplineInterpolatorType::Pointer splineInterpolator =
     SplineInterpolatorType::New();
 
   typedef itk::LinearInterpolateImageFunction<
     InternalImageType, double >  LinearInterpolatorType;
-
   LinearInterpolatorType::Pointer linearInterpolator =
     LinearInterpolatorType::New();
 
-  if (atoi( argv[5] ))
+   typedef itk::NearestNeighborInterpolateImageFunction<
+    InternalImageType, double >  NearesInterpolatorType;
+  NearesInterpolatorType::Pointer nearestInterpolator =
+    NearesInterpolatorType::New();
+
+  if ( (atoi( argv[5] )) > 0) //Bspline 0-5
     {
     splineInterpolator->SetSplineOrder(atoi( argv[5] ));
     resampler->SetInterpolator(splineInterpolator);
     }
   else
     {
-    resampler->SetInterpolator( linearInterpolator );
+    if ( (atoi( argv[5] ) ) == 0)// Linear
+      {
+      resampler->SetInterpolator( linearInterpolator );
+      }
+    else // nearest (-1)
+      {
+      resampler->SetInterpolator( nearestInterpolator );
+      }
     }
 
 

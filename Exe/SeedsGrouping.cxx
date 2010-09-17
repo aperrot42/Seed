@@ -101,6 +101,8 @@ int main(int argc, char* argv [] )
   reader->GetOutput()->SetRegions(reader->GetOutput()->GetLargestPossibleRegion());
   reader->Update();
 
+  InputImageType::Pointer inputImage = reader->GetOutput();
+
   pointPairType pixelValuePair;
   pointListQueueType pointsQueue;
 
@@ -122,10 +124,12 @@ int main(int argc, char* argv [] )
       // generate measurement vector from index
       pixelIndex = inputIterator.GetIndex();
       // TransformToPhysicalPoint
+      inputImage->TransformIndexToPhysicalPoint(pixelIndex,pointPosition);
+      /*
       pointPosition[0] = pixelIndex[0]*inputSpacing[0]-inputOrigin[0];
       pointPosition[1] = pixelIndex[1]*inputSpacing[1]-inputOrigin[1];
       pointPosition[2] = pixelIndex[2]*inputSpacing[2]-inputOrigin[2];
-
+      */
       mv[0] = pointPosition[0];
       mv[1] = pointPosition[1];
       mv[2] = pointPosition[2];
@@ -135,7 +139,6 @@ int main(int argc, char* argv [] )
       // push to shorted list
       pixelValuePair.first = inputIterator.Get();
       pixelValuePair.second =  pointPosition;
-      std::cout << pixelValuePair.first << std::endl;
       pointsQueue.push_front(pixelValuePair);
       }
     }
@@ -159,10 +162,10 @@ int main(int argc, char* argv [] )
     {
     std::cout << "Root node is not a terminal node." << std::endl;
     }
-
   TreeType::InstanceIdentifierVectorType neighbors;
   typedef TreeType::InstanceIdentifierVectorType::iterator 
     IdentifierVectorIterator;
+
 
   pointListQueueType::iterator pointListIterator;
   pointListQueueType::iterator pointListIterator2;
@@ -174,6 +177,7 @@ int main(int argc, char* argv [] )
   pointListQueueType finalPoints;
 
   std::cout << "Filtering seeds" << std::endl;
+  std::cout << "initial seeds : " << pointsQueue.size() << std::endl;
 
   while ( !pointsQueue.empty() )
     {
@@ -201,8 +205,10 @@ int main(int argc, char* argv [] )
     std::cout << "  measurement vector : distance" << std::endl;
     */
     // for all query results
-    IdentifierVectorIterator n_it = neighbors.begin();
-    for( ; n_it != neighbors.end(); ++n_it )
+    
+    std::cout << queryPoint <<std::endl;
+
+    for(IdentifierVectorIterator n_it = neighbors.begin(); n_it != neighbors.end(); ++n_it )
       {
       // for all query results, display distances
       pointToDeleteMeasurementVector = 
@@ -213,29 +219,29 @@ int main(int argc, char* argv [] )
       //          << " : "
       //          << distanceMetric->Evaluate( pointToDeleteMeasurementVector ) << std::endl;
       //delete seeds corresponding to description
+      std::cout <<"  "<< pointToDeleteMeasurementVector <<std::endl;
       pointListIterator2 = pointListIterator;
       ++pointListIterator2;
-
-      for ( ; pointListIterator2 != pointsQueue.end(); ++pointListIterator2 )
+      for ( ; 
+            pointListIterator2 != pointsQueue.end(); 
+            ++pointListIterator2 )
         {
         if( 
-           (pointListIterator2->second[0]==(pointToDeleteMeasurementVector[0]) )
-           && (pointListIterator2->second[1]==(pointToDeleteMeasurementVector[1]) )
-           && (pointListIterator2->second[2]==(pointToDeleteMeasurementVector[2]) ) )
+           ((float)pointListIterator2->second[0]==(float)(pointToDeleteMeasurementVector[0]) )
+           && ((float)pointListIterator2->second[1]==(float)(pointToDeleteMeasurementVector[1]) )
+           && ((float)pointListIterator2->second[2]==(float)(pointToDeleteMeasurementVector[2]) ) )
           {
-          //std::cout << "    erase : " << pointListIterator2->second << std::endl;
+          std::cout << "    erase : " << pointListIterator2->second << std::endl;
           pointsQueue.erase(pointListIterator2);
           break;
           }
         }
-
       }
 
     // store current query point in the final points vector
     finalPoints.push_front( pointPairType(pointListIterator->first,pointListIterator->second) );
     // delete current query point from the point query list
     pointsQueue.pop_front();
-    std::cout << pointsQueue.size() << std::endl;
     }
 
 
@@ -249,6 +255,9 @@ int main(int argc, char* argv [] )
   OutputImageType::PointType outputOrigin = reader->GetOutput()->GetOrigin();
 
   OutputImageType::Pointer outputImage = OutputImageType::New();
+  outputImage->SetSpacing(outputSpacing);
+  outputImage->SetOrigin(outputOrigin);
+
   outputImage->SetRegions( reader->GetOutput()->GetLargestPossibleRegion() );
   outputImage->Allocate();
   outputImage->FillBuffer(itk::NumericTraits< OutputPixelType >::Zero);
@@ -263,13 +272,10 @@ int main(int argc, char* argv [] )
         ++finalPointsIterator )
     {
     outputPointPosition = finalPointsIterator->second;
-
-    for (unsigned int i = 0; i<Dimension;++i)
-      {
-      outputPixelIndex[i] = (unsigned int) outputPointPosition[i]/inputSpacing[i];
-      }
+    outputImage->TransformPhysicalPointToIndex(outputPointPosition,outputPixelIndex);
     outputImage->SetPixel(outputPixelIndex,finalPointsIterator->first);
     }
+
 
   WriterType::Pointer writer = WriterType::New();
   writer->SetFileName( argv[2] );
