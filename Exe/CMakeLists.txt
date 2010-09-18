@@ -7,8 +7,11 @@ SET( CONFOREG_EXE_ITK_SRC
   KeepRangeFiltering
   DilateDistanceMap
   LocalMaximaExtraction
-  SeedsFilteringNuclei
+  ImageMasking
   SeedsGrouping
+#utilities and interfaces
+  RescaleDoubleToUChar
+  ValidationStatistics
   )
 
 FOREACH( var ${CONFOREG_EXE_ITK_SRC} )

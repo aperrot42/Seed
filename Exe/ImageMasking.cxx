@@ -1,19 +1,3 @@
-/*=========================================================================
-
-  Program:   Insight Segmentation & Registration Toolkit
-  Module:    $RCSfile: itkMultiScaleHessianSmoothed3DToMembranenessMeasureImageFilterTest.cxx,v $
-  Language:  C++
-  Date:      $Date: 2007/04/01 21:19:46 $
-  Version:   $Revision: 1.5 $
-
-  Copyright (c) Insight Software Consortium. All rights reserved.
-  See ITKCopyright.txt or http://www.itk.org/HTML/Copyright.htm for details.
-
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notices for more information.
-
-=========================================================================*/
 #include "itkImageFileReader.h"
 #include "itkImageFileWriter.h"
 #include "itkRescaleIntensityImageFilter.h"
@@ -26,7 +10,7 @@ int main(int argc, char* argv [] )
     {
     std::cerr << "Missing Parameters: "
               << argv[0] << std::endl
-              << "ThresholdedSeedImage(itkimage) NucleiImage(itkimage) "
+              << "inputImage(itkimage) mask(itkimage) "
               << "OutputImage(itkimage)" << std::endl;
     return EXIT_FAILURE;
     }
@@ -49,11 +33,11 @@ int main(int argc, char* argv [] )
   typedef itk::MultiplyImageFilter< InputImageType, InputImageType, OutputImageType >
     MultiplyFilterType;
 
-  std::cout << "reading thresholded nuclei image" << std::endl;
+  std::cout << "reading inputImage" << std::endl;
   ReaderType::Pointer reader = ReaderType::New();
   reader->SetFileName ( argv[1] );
 
-  std::cout << "reading seed image" << std::endl;
+  std::cout << "reading mask" << std::endl;
   ReaderType::Pointer reader2 = ReaderType::New();
   reader2->SetFileName ( argv[2] );
 

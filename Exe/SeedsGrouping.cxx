@@ -86,7 +86,7 @@ int main(int argc, char* argv [] )
   typedef TreeType::KdTreeNodeType NodeType;
   typedef itk::Statistics::EuclideanDistanceMetric< MeasurementVectorType > DistanceMetricType;
 
-  typedef std::pair< InputImageType::PixelType, InputImageType::PointType > pointPairType;
+  typedef std::pair< InputImageType::PixelType, MeasurementVectorType > pointPairType;
   typedef std::list< pointPairType > pointListQueueType;
 
 
@@ -138,14 +138,14 @@ int main(int argc, char* argv [] )
       sample->PushBack( mv );
       // push to shorted list
       pixelValuePair.first = inputIterator.Get();
-      pixelValuePair.second =  pointPosition;
+      pixelValuePair.second =  mv;
       pointsQueue.push_front(pixelValuePair);
       }
     }
 
   pointsQueue.sort( compareFirst
                     < InputImageType::PixelType,
-                      InputImageType::PointType >() );
+                      MeasurementVectorType >() );
 
   std::cout << "Generating KdTree" << std::endl;
   TreeGeneratorType::Pointer treeGenerator = TreeGeneratorType::New();
@@ -179,17 +179,20 @@ int main(int argc, char* argv [] )
   std::cout << "Filtering seeds" << std::endl;
   std::cout << "initial seeds : " << pointsQueue.size() << std::endl;
 
+
   while ( !pointsQueue.empty() )
     {
     pointListIterator = pointsQueue.begin();
 
     // create the query point
-    pointPosition = pointListIterator->second;
+    queryPoint = pointListIterator->second;
+    /*
     for ( unsigned int i = 0 ; i < Dimension ; ++i )
       {
       queryPoint[i] = pointPosition[i];
       origin[i] = queryPoint[i];
       }
+    */
     //start the query
     tree->Search( queryPoint, m_smallestRadius, neighbors );
 
@@ -226,10 +229,7 @@ int main(int argc, char* argv [] )
             pointListIterator2 != pointsQueue.end(); 
             ++pointListIterator2 )
         {
-        if( 
-           ((float)pointListIterator2->second[0]==(float)(pointToDeleteMeasurementVector[0]) )
-           && ((float)pointListIterator2->second[1]==(float)(pointToDeleteMeasurementVector[1]) )
-           && ((float)pointListIterator2->second[2]==(float)(pointToDeleteMeasurementVector[2]) ) )
+        if (pointListIterator2->second == (pointToDeleteMeasurementVector) )
           {
           std::cout << "    erase : " << pointListIterator2->second << std::endl;
           pointsQueue.erase(pointListIterator2);
@@ -271,7 +271,13 @@ int main(int argc, char* argv [] )
         finalPointsIterator != finalPoints.end();
         ++finalPointsIterator )
     {
-    outputPointPosition = finalPointsIterator->second;
+    for (unsigned int i = 0; i<Dimension;++i)
+      {
+          outputPointPosition[i] = (finalPointsIterator->second)[i];
+      }
+    //inputImage->TransformPhysicalPointToIndex(pixelIndex,pointPosition);
+
+
     outputImage->TransformPhysicalPointToIndex(outputPointPosition,outputPixelIndex);
     outputImage->SetPixel(outputPixelIndex,finalPointsIterator->first);
     }

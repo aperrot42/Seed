@@ -64,12 +64,15 @@ int main(int argc, char* argv [] )
 
   StructuringElementType::RadiusType structuringRadius;
   StructuringElementType structuringElement;
+  
+  InputImageType::Pointer inputImage = reader->GetOutput();
 
   for (int i=0; i< Dimension;++i)
     {
+    
     structuringRadius[i] = static_cast<unsigned int>(
                              m_smallestRadius
-                             /(reader->GetOutput()->GetSpacing()[i]) );
+                             /(inputImage->GetSpacing()[i]) );
     }
   std::cout << structuringRadius << std::endl;
 
@@ -83,8 +86,8 @@ int main(int argc, char* argv [] )
   std::cout << "dilate input image with a sphere of radius : " 
             << structuringRadius
             << std::endl;
-
-  grayscaleDilateFilter->SetInput(reader->GetOutput());
+  grayscaleDilateFilter->SetNumberOfThreads(6);
+  grayscaleDilateFilter->SetInput(inputImage);
   grayscaleDilateFilter->Update();
 
   WriterType::Pointer writer = WriterType::New();

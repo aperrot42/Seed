@@ -72,7 +72,8 @@ int main(int argc, char* argv [] )
   reader->Update();
 
   std::cout << "Local maxima computing" << std::endl;
-  std::cout << "maximum local maxima=" << m_MaxDistance << std::endl;
+  std::cout << "local maximas in [ " << m_MinDistance << " ; " << m_MaxDistance
+            << " ]" << std::endl;
 
   LocalMaximaFilterType::Pointer localMaximaFilter
     =  LocalMaximaFilterType::New();

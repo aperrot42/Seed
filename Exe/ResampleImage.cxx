@@ -125,6 +125,8 @@ int main( int argc, char * argv[] )
 
   if ( (atoi( argv[5] )) > 0) //Bspline 0-5
     {
+    std::cout << "spline of order "<< (atoi( argv[5] ))
+              << " interpolation" << std::endl;
     splineInterpolator->SetSplineOrder(atoi( argv[5] ));
     resampler->SetInterpolator(splineInterpolator);
     }
@@ -132,10 +134,12 @@ int main( int argc, char * argv[] )
     {
     if ( (atoi( argv[5] ) ) == 0)// Linear
       {
+      std::cout << "linear interpolation" << std::endl;
       resampler->SetInterpolator( linearInterpolator );
       }
     else // nearest (-1)
       {
+      std::cout << "nearest neighboor interpolation" << std::endl;
       resampler->SetInterpolator( nearestInterpolator );
       }
     }
