@@ -150,7 +150,7 @@ int main(int argc, char* argv [] )
   std::cout << "Generating KdTree" << std::endl;
   TreeGeneratorType::Pointer treeGenerator = TreeGeneratorType::New();
   treeGenerator->SetSample( sample );
-  treeGenerator->SetBucketSize( 16 );
+  treeGenerator->SetBucketSize( 1 );
   treeGenerator->Update();
   TreeType::Pointer tree = treeGenerator->GetOutput();
   NodeType* root = tree->GetRoot();
@@ -209,7 +209,7 @@ int main(int argc, char* argv [] )
     */
     // for all query results
     
-    std::cout << queryPoint <<std::endl;
+    //std::cout << queryPoint <<std::endl;
 
     for(IdentifierVectorIterator n_it = neighbors.begin(); n_it != neighbors.end(); ++n_it )
       {

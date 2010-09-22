@@ -10,8 +10,10 @@ SET( CONFOREG_EXE_ITK_SRC
   ImageMasking
   SeedsGrouping
 #utilities and interfaces
+  SeedImageToSeedTxt
   RescaleDoubleToUChar
   ValidationStatistics
+  RegionsCentroids
   )
 
 FOREACH( var ${CONFOREG_EXE_ITK_SRC} )

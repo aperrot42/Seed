@@ -74,8 +74,10 @@ int main(int argc, char* argv [] )
   std::cout << " Number of Nuclei in the image : " << numberOfNuclei << std::endl;
   std::cout << " or " << connectedComponentsFilter->GetObjectCount() << std::endl;
 
-  std::vector<SeedCountType> seedsPerNuclei;
-  seedsPerNuclei.resize(numberOfNuclei);
+
+
+
+  std::map< NucleiIdType, SeedCountType > seedsPerNuclei;
   NucleiIdType nucleiId;
   SeedCountType seedsOutOfNuclei = 0;
   SeedCountType overdectectedNuclei = 0;
@@ -121,6 +123,7 @@ int main(int argc, char* argv [] )
          // 0 is background in the image, whereas in the vector, it is the first cell
          if (seedsPerNuclei[nucleiId-1] == 0)
            {
+
            // we detected a new nuclei : good
            --undetectedNucleis;
            }
@@ -133,7 +136,7 @@ int main(int argc, char* argv [] )
              ++overdectectedNuclei;
              }
            }
-         seedsPerNuclei.at(nucleiId-1) = seedsPerNuclei[nucleiId-1] + 1;
+         seedsPerNuclei[nucleiId-1] = seedsPerNuclei[nucleiId-1] + 1;
          //++(seedsPerNuclei.at(nucleiId-1));
          }
        else
