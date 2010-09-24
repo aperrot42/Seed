@@ -7,6 +7,7 @@
 #include "itkSmartPointer.h"
 #include "itkScalarConnectedComponentImageFilter.h"
 #include "itkLabelImageToLabelMapFilter.h"
+#include "itkRelabelComponentImageFilter.h"
 
 #include <iostream>
 //#include <sstream>
@@ -50,30 +51,25 @@ int main(int argc, char* argv [] )
   SegmentReaderType::Pointer reader = SegmentReaderType::New();
   reader->SetFileName ( argv[1] );
   reader->Update();
-  SegmentImageType::Pointer groundTruthImage = reader->GetOutput();
 
 
-  ConnectedComponentFilterType::Pointer connectedComponentsFilter =
-    ConnectedComponentFilterType::New();
-
-  // make sure about internal storage type
-  connectedComponentsFilter->SetInput(reader->GetOutput());
-  connectedComponentsFilter->Update();
-  connectedComponentsFilter->GetObjectCount();
   //displaying informations about the input image
   std::cout << "Spacing of segmented image" 
             << reader->GetOutput()->GetSpacing() << std::endl;
   std::cout << "Origin of segmented image"
             << reader->GetOutput()->GetOrigin() << std::endl;
 
-  // looking for the maxima in the label image
-  MaximaFilterType::Pointer maximaFilter = MaximaFilterType::New();
-  maximaFilter->SetImage(groundTruthImage);
-  maximaFilter->ComputeMaximum();
-  NucleiCountType numberOfNuclei = maximaFilter->GetMaximum();
-  std::cout << " Number of Nuclei in the image : " << numberOfNuclei << std::endl;
-  std::cout << " or " << connectedComponentsFilter->GetObjectCount() << std::endl;
 
+
+  typedef itk::RelabelComponentImageFilter< SegmentImageType,SegmentImageType > RelabelFilterType;
+  RelabelFilterType::Pointer relabelFilter = RelabelFilterType::New();
+  relabelFilter->SetInput(reader->GetOutput());
+  relabelFilter->Update();
+
+  SegmentImageType::Pointer groundTruthImage = relabelFilter->GetOutput();
+
+  NucleiCountType numberOfNuclei = relabelFilter->GetNumberOfObjects();
+  std::cout << "Number of objects " << relabelFilter->GetNumberOfObjects() << std::endl;
 
 
 

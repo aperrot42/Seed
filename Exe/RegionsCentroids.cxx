@@ -39,8 +39,8 @@ int main(int argc, char * argv[])
   binaryFilter->SetInput(reader->GetOutput());
   binaryFilter->SetInsideValue(1);
   binaryFilter->SetOutsideValue(0);
-  binaryFilter->SetLowerThreshold(0.1);
-  binaryFilter->SetUpperThreshold(9.);
+  binaryFilter->SetLowerThreshold(0.01);
+  binaryFilter->SetUpperThreshold(1000);
   binaryFilter->Update();
   
 
@@ -97,20 +97,28 @@ int main(int argc, char * argv[])
     const LabelObjectType * labelObject = labelMap->GetLabelObject( label );
     std::cout << label << "\t" <<  labelObject->GetCentroid();
     centroid = labelObject->GetCentroid();
-    outfile << centroid[0] << ' ' << centroid[1] << ' '<< centroid[2] << ' ';
-    if (argc > 3)
+    if ((labelObject->GetSize() > 4) || (labelObject->GetPhysicalSize() > 3.14*(4./3.)*(5.*5.*5.)*7. ))
       {
-      std::cout << "\t" << labelObject->GetPhysicalSize()/(atof(argv[3])*3.14*4/3) << std::endl;
-      // confidence decrease if local maxima more spread
-      outfile << (labelObject->GetPhysicalSize())/(localmaxsize);
+      outfile << centroid[0] << ' ' << centroid[1] << ' '<< centroid[2] << ' ';
+
+      if (argc > 3)
+        {
+        std::cout << "\t" << labelObject->GetPhysicalSize()/(atof(argv[3])*3.14*4/3) << std::endl;
+        // confidence decrease if local maxima more spread
+        outfile << (labelObject->GetPhysicalSize())/(localmaxsize);
+        }
+      else
+        {
+        std::cout << "\t" << localmaxsize << std::endl;
+        // if we have no info on info
+        outfile << localmaxsize;
+        }
+      outfile << std::endl;
       }
     else
       {
-      std::cout << "\t" << localmaxsize << std::endl;
-      // if we have no info on info
-      outfile << localmaxsize;
+      std::cout << "Refused : too small or ways too big" << std::endl;
       }
-    outfile << std::endl;
     }
   outfile.close();
 

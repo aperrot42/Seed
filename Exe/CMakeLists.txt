@@ -9,11 +9,14 @@ SET( CONFOREG_EXE_ITK_SRC
   LocalMaximaExtraction
   ImageMasking
   SeedsGrouping
+  HysteresisThresholding
 #utilities and interfaces
   SeedImageToSeedTxt
   RescaleDoubleToUChar
   ValidationStatistics
   RegionsCentroids
+  NucleiRegenerate
+  RelabelLabelImage
   )
 
 FOREACH( var ${CONFOREG_EXE_ITK_SRC} )
@@ -28,4 +31,6 @@ FOREACH( var ${CONFOREG_EXE_ITK_SRC} )
   )
 ENDFOREACH( var ${CONFOREG_EXE_ITK_SRC} )
 
-
+#TARGET_LINK_LIBRARIES( VTKClustering
+#  VTK
+#  )

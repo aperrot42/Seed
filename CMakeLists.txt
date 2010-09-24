@@ -78,6 +78,17 @@ ELSE( ITK_FOUND )
 ENDIF( ITK_FOUND )
 
 
+#--------------------------------------------------------------------------
+# VTK
+#--------------------------------------------------------------------------
+#FIND_PACKAGE( VTK )
+#IF( VTK_FOUND )
+#  INCLUDE( ${VTK_USE_FILE} )
+#ELSE( VTK_FOUND )
+#  MESSAGE( FATAL_ERROR "Cannot build project without VTK. Please set VTK_DIR.")
+#ENDIF( VTK_FOUND )
+
+
 #-------------------------------------------------------------------------
 # PROJECT STRUCTURE
 #-------------------------------------------------------------------------
