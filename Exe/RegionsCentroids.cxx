@@ -15,7 +15,7 @@ int main(int argc, char * argv[])
     {
     std::cerr << "Missing Parameters: "
               << argv[0] << std::endl
-              << "InputImage(itkimage) OutputPoints(txt) [radiusOfMaxima(float)]" << std::endl;
+              << "InputImage(itkimage) OutputPoints(txt) [largestCellRadius]" << std::endl;
     return EXIT_FAILURE;
     }
 
@@ -77,14 +77,14 @@ int main(int argc, char * argv[])
   converter->Update();
   
   
-  float localmaxsize = 1.;
+  float LargestCellRadius = 1.;
 
   if (argc > 3)
     {
-    localmaxsize = (atof(argv[3]));
-    localmaxsize *= localmaxsize;
-    localmaxsize *= localmaxsize;
-    localmaxsize *= 3.14*4./3.;
+    LargestCellRadius = (atof(argv[3]));
+    LargestCellRadius *= LargestCellRadius;
+    LargestCellRadius *= LargestCellRadius;
+    LargestCellRadius *= 3.14*4./3.;
     }
   BinaryImageType::PointType centroid;
   std::fstream outfile;
@@ -97,27 +97,30 @@ int main(int argc, char * argv[])
     const LabelObjectType * labelObject = labelMap->GetLabelObject( label );
     std::cout << label << "\t" <<  labelObject->GetCentroid();
     centroid = labelObject->GetCentroid();
-    if ((labelObject->GetSize() > 4) || (labelObject->GetPhysicalSize() > 3.14*(4./3.)*(5.*5.*5.)*7. ))
+    if ((labelObject->GetSize() > 4) || (labelObject->GetPhysicalSize() > LargestCellRadius*5 ))
       {
       outfile << centroid[0] << ' ' << centroid[1] << ' '<< centroid[2] << ' ';
 
       if (argc > 3)
         {
-        std::cout << "\t" << labelObject->GetPhysicalSize()/(atof(argv[3])*3.14*4/3) << std::endl;
-        // confidence decrease if local maxima more spread
-        outfile << (labelObject->GetPhysicalSize())/(localmaxsize);
+        std::cout << "\t" << labelObject->GetPhysicalSize()/(LargestCellRadius) << std::endl;
+        // confidence decrease if inside of cell too big
+        outfile << (labelObject->GetPhysicalSize())/(LargestCellRadius);
         }
       else
         {
-        std::cout << "\t" << localmaxsize << std::endl;
+        std::cout << "\t" << LargestCellRadius << std::endl;
         // if we have no info on info
-        outfile << localmaxsize;
+        outfile <<LargestCellRadius;
         }
       outfile << std::endl;
       }
     else
       {
-      std::cout << "Refused : too small or ways too big" << std::endl;
+      if (labelObject->GetSize() > 4)
+        std::cout << "Refused : too small" << std::endl;
+      else
+        std::cout << "Refused : too big" << std::endl;
       }
     }
   outfile.close();
