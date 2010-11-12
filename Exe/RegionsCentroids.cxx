@@ -3,9 +3,17 @@
 #include "itkShapeLabelObject.h"
 #include "itkLabelMap.h"
 #include "itkConnectedComponentImageFilter.h"
+#include "itkLabelObject.h"
+#include "itkLabelMap.h"
 #include "itkLabelImageToShapeLabelMapFilter.h"
+#include "itkLabelMapToLabelImageFilter.h"
+#include "itkGeometryUtilities.h"
 #include "itkBinaryThresholdImageFilter.h"
 #include <stdio.h>
+
+
+
+
 
 
 int main(int argc, char * argv[])
@@ -60,13 +68,15 @@ int main(int argc, char * argv[])
   // is chosen in order to read some attribute related to the shape
   // of the objects (by opposition to the content of the object, with
   // the StatisticsLabelObejct).
-  typedef unsigned long LabelType;
+  typedef unsigned int LabelType;
   typedef itk::ShapeLabelObject< LabelType, Dimension > LabelObjectType;
   typedef itk::LabelMap< LabelObjectType > LabelMapType;
 
   // convert the image in a collection of objects
   typedef itk::LabelImageToShapeLabelMapFilter< BinaryImageType, LabelMapType > ConverterType;
+
   ConverterType::Pointer converter = ConverterType::New();
+/*
   converter->SetInput( connectedFilter->GetOutput() );
   //converter->SetInputForegroundValue(2);
   //converter->FullyConnectedOn ();
@@ -97,7 +107,7 @@ int main(int argc, char * argv[])
     const LabelObjectType * labelObject = labelMap->GetLabelObject( label );
     std::cout << label << "\t" <<  labelObject->GetCentroid();
     centroid = labelObject->GetCentroid();
-    if ((labelObject->GetSize() > 4) || (labelObject->GetPhysicalSize() > LargestCellRadius*5 ))
+    if ((labelObject->GetNumberOfPixels() > 4) || (labelObject->GetPhysicalSize() > LargestCellRadius*5 ))
       {
       outfile << centroid[0] << ' ' << centroid[1] << ' '<< centroid[2] << ' ';
 
@@ -117,7 +127,7 @@ int main(int argc, char * argv[])
       }
     else
       {
-      if (labelObject->GetSize() > 4)
+      if (labelObject->GetNumberOfPixels() > 4)
         std::cout << "Refused : too small" << std::endl;
       else
         std::cout << "Refused : too big" << std::endl;
@@ -126,7 +136,7 @@ int main(int argc, char * argv[])
   outfile.close();
 
 
-
+*/
 
   return EXIT_SUCCESS;
 }

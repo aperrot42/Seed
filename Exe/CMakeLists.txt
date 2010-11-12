@@ -1,5 +1,5 @@
 SET( CONFOREG_EXE_ITK_SRC
-#  seed
+#seed
   MedianFiltering
   ResampleImage
   BinaryThresholdFiltering
@@ -15,7 +15,7 @@ SET( CONFOREG_EXE_ITK_SRC
   RescaleDoubleToUChar
   ValidationStatistics
   RegionsCentroids
-  NucleiRegenerate
+#NucleiRegenerate
   RelabelLabelImage
   )
 
@@ -24,10 +24,7 @@ FOREACH( var ${CONFOREG_EXE_ITK_SRC} )
   TARGET_LINK_LIBRARIES( ${var}
   ITKIO
   ITKCommon
-  ITKBasicFilters
-  ITKAlgorithms
-  ITKStatistics
-  ITKNumerics
+  ITKReview
   )
 ENDFOREACH( var ${CONFOREG_EXE_ITK_SRC} )
 
